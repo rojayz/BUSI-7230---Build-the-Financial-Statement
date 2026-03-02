@@ -18,7 +18,7 @@ body {
   margin-bottom: 16px;
 }
 
-.hidden { display: none; pointer-events: none; }
+.hidden { display: none !important; }
 
 .row {
   display: flex;
@@ -74,7 +74,7 @@ body {
   margin: 12px 0;
 }
 
-twoCol {
+.twoCol {
   display: grid;
   grid-template-columns: 1fr;
   gap: 14px;
