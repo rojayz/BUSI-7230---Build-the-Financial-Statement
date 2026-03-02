@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Build the Financial Statements</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <main class="container">
+    <header class="header">
+      <h1>Build the Financial Statements</h1>
+      <p class="sub">An MBA accounting mini-game (Income Statement, Balance Sheet, Cash Flow).</p>
+    </header>
+
+    <!-- START SCREEN -->
+    <section id="startScreen" class="card">
+      <h2>Learning Objectives</h2>
+      <ul>
+        <li>Identify the primary financial statement impacted by common transactions.</li>
+        <li>Connect transactions to line items on the Income Statement, Balance Sheet, and Cash Flow Statement.</li>
+        <li>Learn through immediate feedback and explanations.</li>
+      </ul>
+
+      <div class="note">
+        <strong>Game rule:</strong> Some transactions affect multiple statements. For this game, pick the
+        <em>primary</em> statement the transaction is best associated with for learning purposes.
+      </div>
+
+      <button id="startBtn" class="btn">Start Game</button>
+    </section>
+
+    <!-- GAME SCREEN -->
+    <section id="gameScreen" class="card hidden">
+      <div class="row">
+        <div>
+          <div id="roundLabel" class="pill">Round 1</div>
+          <div id="progressText" class="muted">Question 1 of 10</div>
+        </div>
+        <div class="score">
+          Score: <span id="scoreText">0</span>
+        </div>
+      </div>
+
+      <!-- ROUND 1 AREA -->
+      <div id="round1Area">
+        <h2 id="questionText">Transaction will appear here.</h2>
+        <div class="buttonRow">
+          <button class="btn-secondary" data-answer="IS">Income Statement</button>
+          <button class="btn-secondary" data-answer="BS">Balance Sheet</button>
+          <button class="btn-secondary" data-answer="CF">Cash Flow</button>
+        </div>
+      </div>
+
+      <!-- ROUND 2 AREA -->
+      <div id="round2Area" class="hidden">
+        <h2>Place the Line Item</h2>
+        <p class="muted">Click a line item, then click the correct bucket.</p>
+
+        <div class="twoCol">
+          <div>
+            <h3>Line Items</h3>
+            <div id="itemsList" class="list"></div>
+          </div>
+
+          <div>
+            <h3>Buckets</h3>
+            <div class="buckets">
+              <button class="bucket" data-bucket="IS:Revenue">Income Statement: Revenue</button>
+              <button class="bucket" data-bucket="IS:Expense">Income Statement: Expense</button>
+              <button class="bucket" data-bucket="BS:Asset">Balance Sheet: Asset</button>
+              <button class="bucket" data-bucket="BS:Liability">Balance Sheet: Liability</button>
+              <button class="bucket" data-bucket="BS:Equity">Balance Sheet: Equity</button>
+              <button class="bucket" data-bucket="CF:Operating">Cash Flow: Operating</button>
+              <button class="bucket" data-bucket="CF:Investing">Cash Flow: Investing</button>
+              <button class="bucket" data-bucket="CF:Financing">Cash Flow: Financing</button>
+            </div>
+          </div>
+        </div>
+
+        <div id="selectedItemBanner" class="note hidden"></div>
+      </div>
+    </section>
+
+    <!-- RESULTS SCREEN -->
+    <section id="resultsScreen" class="card hidden">
+      <h2>Results</h2>
+      <p class="big">Final Score: <strong><span id="finalScoreText">0</span></strong></p>
+      <div id="reviewArea" class="list"></div>
+      <button id="restartBtn" class="btn">Play Again</button>
+    </section>
+  </main>
+
+  <!-- FEEDBACK MODAL -->
+  <div id="modalOverlay" class="modalOverlay hidden">
+    <div class="modal card">
+      <h3 id="modalTitle">Feedback</h3>
+      <p id="modalBody">Explanation here.</p>
+      <button id="closeModalBtn" class="btn">Continue</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
