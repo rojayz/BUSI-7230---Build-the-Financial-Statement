@@ -1,5 +1,6 @@
 // -----------------------
 // BlueWave Coffee Game
+// Upgraded UI: statement panels + statement-style placement + progress bar
 // -----------------------
 
 const fmtMoney = (n) => {
@@ -10,10 +11,10 @@ const fmtMoney = (n) => {
 
 // ---------- Round 1: Transactions (primary statement classification) ----------
 const transactions = [
-  { id: 1, text: "Provided coffee catering services on account.", amount: 5000, correct: "IS", explanation: "This is primarily revenue (Income Statement). A/R also increases on the Balance Sheet." },
+  { id: 1, text: "Provided coffee catering services on account.", amount: 5000, correct: "IS", explanation: "Primarily revenue on the Income Statement (A/R also increases on the Balance Sheet)." },
   { id: 2, text: "Purchased a commercial espresso machine for cash.", amount: 12000, correct: "BS", explanation: "Equipment is an asset (Balance Sheet). The cash payment is also an investing outflow on the Cash Flow Statement." },
   { id: 3, text: "Paid barista wages in cash.", amount: 2000, correct: "CF", explanation: "Cash paid for wages is an Operating cash outflow (also an expense on the Income Statement)." },
-  { id: 4, text: "Received cash for gift cards to be redeemed next month.", amount: 3000, correct: "BS", explanation: "This creates Unearned Revenue (a liability) until the revenue is earned—primary classification: Balance Sheet." },
+  { id: 4, text: "Received cash for gift cards to be redeemed next month.", amount: 3000, correct: "BS", explanation: "This creates Unearned Revenue (a liability) until earned—primary classification: Balance Sheet." },
   { id: 5, text: "Recorded monthly depreciation on equipment.", amount: 600, correct: "IS", explanation: "Depreciation is an expense on the Income Statement (and increases Accumulated Depreciation on the Balance Sheet)." },
   { id: 6, text: "Collected cash from customers who previously owed money.", amount: 1200, correct: "CF", explanation: "Cash collections from customers are Operating cash inflows (A/R decreases on the Balance Sheet)." },
   { id: 7, text: "Owner invested cash into BlueWave Coffee.", amount: 20000, correct: "CF", explanation: "Owner contributions are Financing cash inflows (and increase equity on the Balance Sheet)." },
@@ -31,7 +32,7 @@ const lineItems = [
 
   { id: "li5", label: "Equipment", amount: 12000, bucket: "BS:Asset", explanation: "Equipment is a Balance Sheet asset." },
   { id: "li6", label: "Inventory", amount: 4000, bucket: "BS:Asset", explanation: "Inventory is a Balance Sheet asset." },
-  { id: "li7", label: "Accounts Payable", amount: 4000, bucket: "BS:Liability", explanation: "A/P is a Balance Sheet liability." },
+  { id: "li7", label: "Accounts Payable", amount: 4000, bucket: "BS:Liability", explanation: "Accounts Payable is a Balance Sheet liability." },
   { id: "li8", label: "Unearned Revenue", amount: 3000, bucket: "BS:Liability", explanation: "Unearned Revenue is a liability until earned." },
   { id: "li9", label: "Owner Contribution", amount: 20000, bucket: "BS:Equity", explanation: "Owner contributions increase equity." },
 
@@ -134,8 +135,8 @@ function resetGame() {
   state.remainingLineItems = [...lineItems];
   state.placedByBucket = {};
 
-  // clear zone UI
-  Object.values(zoneMap).forEach(z => z.innerHTML = "");
+  Object.values(zoneMap).forEach(z => { if (z) z.innerHTML = ""; });
+
   hide(selectedItemBanner);
   selectedItemBanner.textContent = "";
 
@@ -171,7 +172,8 @@ function renderRound1() {
   txAmount.textContent = fmtMoney(tx.amount);
   questionText.textContent = tx.text;
 
-  const pct = Math.round(((state.txIndex) / transactions.length) * 50); // Round 1 = first 50%
+  // Round 1 = 0% -> 50%
+  const pct = Math.round((state.txIndex / transactions.length) * 50);
   setProgress(pct);
 }
 
@@ -195,7 +197,7 @@ function handleRound1Answer(answer) {
 
   if (!isCorrect) {
     openModal("Not quite.", tx.explanation);
-    return; // try again
+    return;
   }
 
   state.txIndex += 1;
@@ -216,15 +218,13 @@ function startRound2() {
 
   renderLineItems();
   updateSelectedBanner();
-  setProgress(50); // starting Round 2
+  setProgress(50);
 }
 
 function renderLineItems() {
   itemsList.innerHTML = "";
 
-  // Sort for nicer UX: show unselected items grouped-ish
-  const items = [...state.remainingLineItems];
-  items.sort((a, b) => a.label.localeCompare(b.label));
+  const items = [...state.remainingLineItems].sort((a, b) => a.label.localeCompare(b.label));
 
   items.forEach(item => {
     const div = document.createElement("div");
@@ -252,7 +252,6 @@ function renderLineItems() {
     itemsList.appendChild(div);
   });
 
-  // Round 2 progress fills 50% -> 100%
   const total = lineItems.length;
   const placed = total - state.remainingLineItems.length;
   const pct = 50 + Math.round((placed / total) * 50);
@@ -273,6 +272,9 @@ function updateSelectedBanner() {
 }
 
 function renderPlacedItem(bucket, item) {
+  const container = zoneMap[bucket];
+  if (!container) return;
+
   const wrap = document.createElement("div");
   wrap.className = "placed";
 
@@ -285,7 +287,7 @@ function renderPlacedItem(bucket, item) {
   wrap.appendChild(name);
   wrap.appendChild(amt);
 
-  zoneMap[bucket].appendChild(wrap);
+  container.appendChild(wrap);
 }
 
 function handleBucketClick(bucket) {
@@ -312,15 +314,13 @@ function handleBucketClick(bucket) {
 
   if (!isCorrect) {
     openModal("Not quite.", item.explanation);
-    return; // try again
+    return;
   }
 
-  // Mark as placed
   state.placedByBucket[bucket] = state.placedByBucket[bucket] || [];
   state.placedByBucket[bucket].push(item);
   renderPlacedItem(bucket, item);
 
-  // Remove from remaining
   state.remainingLineItems = state.remainingLineItems.filter(x => x.id !== item.id);
   state.selectedLineItemId = null;
 
@@ -342,7 +342,6 @@ function showResults() {
   showScreen("results");
   finalScoreText.textContent = String(state.score);
 
-  // Totals (instructional)
   const rev = sumBucket("IS:Revenue");
   const exp = sumBucket("IS:Expense");
   const net = rev - exp;
@@ -359,7 +358,6 @@ function showResults() {
   totInvCF.textContent = fmtMoney(inv);
   totFinCF.textContent = fmtMoney(fin);
 
-  // Review list
   reviewArea.innerHTML = "";
   state.review.forEach(r => {
     const div = document.createElement("div");
@@ -403,7 +401,7 @@ document.querySelectorAll("[data-round1]").forEach(btn => {
   });
 });
 
-// Round 2: click statement sections (drop zones)
+// Round 2: statement section clicks
 document.querySelectorAll(".dropZone").forEach(btn => {
   btn.addEventListener("click", () => {
     handleBucketClick(btn.dataset.bucket);
