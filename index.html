@@ -1,277 +1,235 @@
-// ---------- Data ----------
-const transactions = [
-  { id: 1, text: "Provided services on account for $5,000.", correct: "IS", explanation: "Primarily revenue on the Income Statement (A/R also increases on the Balance Sheet)." },
-  { id: 2, text: "Purchased equipment for $12,000 cash.", correct: "BS", explanation: "Equipment is an asset (Balance Sheet). (Also an investing cash outflow.)" },
-  { id: 3, text: "Paid $2,000 of wages in cash.", correct: "CF", explanation: "Cash paid for wages is an Operating cash outflow (also an expense on the Income Statement)." },
-  { id: 4, text: "Received $3,000 cash for services to be performed next month.", correct: "BS", explanation: "Unearned Revenue is a liability (Balance Sheet) until earned." },
-  { id: 5, text: "Recorded one month of depreciation expense, $600.", correct: "IS", explanation: "Depreciation is an expense on the Income Statement." },
-  { id: 6, text: "Collected $1,200 cash from a customer who previously owed money.", correct: "CF", explanation: "Cash collections are Operating cash inflows (also reduces A/R on the Balance Sheet)." },
-  { id: 7, text: "Owner invested $20,000 cash into the business.", correct: "CF", explanation: "Owner contributions are Financing cash inflows." },
-  { id: 8, text: "Paid $900 cash for this month’s rent.", correct: "CF", explanation: "Rent paid is an Operating cash outflow (also rent expense)." },
-  { id: 9, text: "Purchased $4,000 of inventory on credit.", correct: "BS", explanation: "Inventory (asset) and Accounts Payable (liability) change — Balance Sheet." },
-  { id: 10, text: "Declared and paid $500 in dividends.", correct: "CF", explanation: "Dividends paid are Financing cash outflows (and reduce equity)." },
-];
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Build the Financial Statements</title>
+  <link rel="stylesheet" href="./style.css?v=20" />
+</head>
+<body>
+  <main class="container">
+    <header class="header">
+      <div class="brand">
+        <div class="logo">BW</div>
+        <div>
+          <h1>Build the Financial Statements</h1>
+          <p class="sub">BlueWave Coffee — classify transactions and build statements like a real finance team.</p>
+        </div>
+      </div>
+    </header>
 
-const lineItems = [
-  { id: "li1", label: "Service Revenue", bucket: "IS:Revenue", explanation: "Revenue belongs on the Income Statement under revenues." },
-  { id: "li2", label: "Wage Expense", bucket: "IS:Expense", explanation: "Wages are an expense on the Income Statement." },
-  { id: "li3", label: "Equipment", bucket: "BS:Asset", explanation: "Equipment is a long-term asset on the Balance Sheet." },
-  { id: "li4", label: "Accounts Payable", bucket: "BS:Liability", explanation: "Accounts Payable is a liability on the Balance Sheet." },
-  { id: "li5", label: "Retained Earnings", bucket: "BS:Equity", explanation: "Retained Earnings is part of equity on the Balance Sheet." },
-  { id: "li6", label: "Cash collected from customers", bucket: "CF:Operating", explanation: "Collections from customers are Operating cash inflows." },
-  { id: "li7", label: "Cash paid for rent", bucket: "CF:Operating", explanation: "Rent paid is an Operating cash outflow." },
-  { id: "li8", label: "Purchase of equipment (cash)", bucket: "CF:Investing", explanation: "Buying equipment is an Investing cash outflow." },
-  { id: "li9", label: "Owner cash contribution", bucket: "CF:Financing", explanation: "Owner contributions are Financing cash inflows." },
-  { id: "li10", label: "Depreciation Expense", bucket: "IS:Expense", explanation: "Depreciation is an Income Statement expense." },
-];
+    <!-- START SCREEN -->
+    <section id="startScreen" class="card">
+      <h2>Scenario: You’re the acting CFO for BlueWave Coffee</h2>
+      <p class="muted">
+        BlueWave Coffee is growing fast. Leadership needs clean financials for decision-making.
+        Your job: (1) classify transactions by the primary statement impact, and (2) build the statements by placing line items into the correct sections.
+      </p>
 
-// ---------- State ----------
-const state = {
-  txIndex: 0,
-  score: 0,
-  review: [],
-  selectedLineItemId: null,
-  remainingLineItems: [...lineItems],
-};
+      <div class="grid2">
+        <div class="panel">
+          <h3>Learning Objectives</h3>
+          <ul>
+            <li>Identify the primary statement impacted by common business transactions.</li>
+            <li>Map line items to the Income Statement, Balance Sheet, and Cash Flow Statement sections.</li>
+            <li>Learn through immediate feedback and corrections.</li>
+          </ul>
+        </div>
 
-// ---------- Elements ----------
-const startScreen = document.getElementById("startScreen");
-const gameScreen = document.getElementById("gameScreen");
-const resultsScreen = document.getElementById("resultsScreen");
+        <div class="panel">
+          <h3>Rules</h3>
+          <ul>
+            <li>Some transactions affect multiple statements. Choose the <strong>primary</strong> statement for learning purposes.</li>
+            <li>Round 2 is about <strong>where items live</strong> on the statements.</li>
+            <li>Totals shown at the end are instructional.</li>
+          </ul>
+        </div>
+      </div>
 
-const startBtn = document.getElementById("startBtn");
-const restartBtn = document.getElementById("restartBtn");
+      <div class="startRow">
+        <button id="startBtn" class="btn" type="button">Start Game</button>
+        <span class="muted small">Tip: desktop is best, mobile works too.</span>
+      </div>
+    </section>
 
-const roundLabel = document.getElementById("roundLabel");
-const progressText = document.getElementById("progressText");
-const scoreText = document.getElementById("scoreText");
+    <!-- GAME SCREEN -->
+    <section id="gameScreen" class="card hidden">
+      <div class="topRow">
+        <div>
+          <div id="roundLabel" class="pill">Round 1</div>
+          <div id="progressText" class="muted">Step 1 of 2</div>
+        </div>
 
-const round1Area = document.getElementById("round1Area");
-const questionText = document.getElementById("questionText");
+        <div class="scoreBox">
+          <div class="scoreLabel">Score</div>
+          <div class="scoreValue"><span id="scoreText">0</span></div>
+        </div>
+      </div>
 
-const round2Area = document.getElementById("round2Area");
-const itemsList = document.getElementById("itemsList");
-const selectedItemBanner = document.getElementById("selectedItemBanner");
+      <div class="progressWrap" aria-label="Progress">
+        <div id="progressBar" class="progressBar"></div>
+      </div>
 
-const finalScoreText = document.getElementById("finalScoreText");
-const reviewArea = document.getElementById("reviewArea");
+      <!-- ROUND 1 -->
+      <div id="round1Area" class="round">
+        <h2 class="roundTitle">Round 1: Classify the Transaction</h2>
+        <p class="muted">Click the statement panel that best matches the <strong>primary</strong> impact.</p>
 
-const modalOverlay = document.getElementById("modalOverlay");
-const modalTitle = document.getElementById("modalTitle");
-const modalBody = document.getElementById("modalBody");
-const closeModalBtn = document.getElementById("closeModalBtn");
+        <div class="txCard">
+          <div class="txMeta">
+            <span class="badge" id="txCountBadge">Transaction 1 of 10</span>
+            <span class="amount" id="txAmount">$0</span>
+          </div>
+          <div id="questionText" class="txText">Transaction will appear here.</div>
+        </div>
 
-// ---------- Helpers ----------
-function show(el) { el.classList.remove("hidden"); }
-function hide(el) { el.classList.add("hidden"); }
+        <div class="statementsGrid">
+          <button class="statementCard" data-round1="IS" type="button">
+            <div class="statementTitle">Income Statement</div>
+            <div class="statementHint">Revenue & Expenses → Net Income</div>
+          </button>
 
-function showScreen(which) {
-  hide(startScreen); hide(gameScreen); hide(resultsScreen);
-  if (which === "start") show(startScreen);
-  if (which === "game") show(gameScreen);
-  if (which === "results") show(resultsScreen);
-}
+          <button class="statementCard" data-round1="BS" type="button">
+            <div class="statementTitle">Balance Sheet</div>
+            <div class="statementHint">Assets, Liabilities, Equity</div>
+          </button>
 
-function openModal(title, body) {
-  modalTitle.textContent = title;
-  modalBody.textContent = body;
-  show(modalOverlay);
-}
+          <button class="statementCard" data-round1="CF" type="button">
+            <div class="statementTitle">Cash Flow Statement</div>
+            <div class="statementHint">Operating / Investing / Financing</div>
+          </button>
+        </div>
+      </div>
 
-function closeModal() { hide(modalOverlay); }
+      <!-- ROUND 2 -->
+      <div id="round2Area" class="round hidden">
+        <h2 class="roundTitle">Round 2: Build the Statements</h2>
+        <p class="muted">Click a line item, then click the exact section where it belongs.</p>
 
-function updateScore() { scoreText.textContent = state.score; }
+        <div class="twoCol">
+          <div>
+            <h3>Line Items</h3>
+            <div id="itemsList" class="list"></div>
+            <div id="selectedItemBanner" class="note hidden"></div>
+          </div>
 
-function resetGame() {
-  state.txIndex = 0;
-  state.score = 0;
-  state.review = [];
-  state.selectedLineItemId = null;
-  state.remainingLineItems = [...lineItems];
-  updateScore();
-}
+          <div>
+            <h3>Financial Statements</h3>
 
-function normalizeRound1Label(code) {
-  if (code === "IS") return "Income Statement";
-  if (code === "BS") return "Balance Sheet";
-  if (code === "CF") return "Cash Flow";
-  return code;
-}
+            <div class="statementLayout">
+              <div class="stmt">
+                <div class="stmtHeader">Income Statement</div>
+                <div class="stmtBody">
+                  <button class="dropZone" data-bucket="IS:Revenue" type="button">
+                    <div class="dzTitle">Revenue</div>
+                    <div class="dzHint">Sales, service revenue</div>
+                    <div class="dzItems" id="dz-IS-Revenue"></div>
+                  </button>
 
-// ---------- Round 1 ----------
-function renderRound1() {
-  roundLabel.textContent = "Round 1";
-  show(round1Area);
-  hide(round2Area);
+                  <button class="dropZone" data-bucket="IS:Expense" type="button">
+                    <div class="dzTitle">Expenses</div>
+                    <div class="dzHint">Wages, rent, depreciation</div>
+                    <div class="dzItems" id="dz-IS-Expense"></div>
+                  </button>
+                </div>
+              </div>
 
-  const tx = transactions[state.txIndex];
-  progressText.textContent = `Question ${state.txIndex + 1} of ${transactions.length}`;
-  questionText.textContent = tx.text;
-}
+              <div class="stmt">
+                <div class="stmtHeader">Balance Sheet</div>
+                <div class="stmtBody">
+                  <button class="dropZone" data-bucket="BS:Asset" type="button">
+                    <div class="dzTitle">Assets</div>
+                    <div class="dzHint">Cash, A/R, inventory, equipment</div>
+                    <div class="dzItems" id="dz-BS-Asset"></div>
+                  </button>
 
-function handleRound1Answer(answer) {
-  const tx = transactions[state.txIndex];
-  const correct = tx.correct;
+                  <button class="dropZone" data-bucket="BS:Liability" type="button">
+                    <div class="dzTitle">Liabilities</div>
+                    <div class="dzHint">A/P, unearned revenue</div>
+                    <div class="dzItems" id="dz-BS-Liability"></div>
+                  </button>
 
-  const isCorrect = answer === correct;
-  if (isCorrect) state.score += 1;
+                  <button class="dropZone" data-bucket="BS:Equity" type="button">
+                    <div class="dzTitle">Equity</div>
+                    <div class="dzHint">Owner contributions, retained earnings</div>
+                    <div class="dzItems" id="dz-BS-Equity"></div>
+                  </button>
+                </div>
+              </div>
 
-  state.review.push({
-    type: "Round 1",
-    prompt: tx.text,
-    yourAnswer: normalizeRound1Label(answer),
-    correctAnswer: normalizeRound1Label(correct),
-    explanation: tx.explanation,
-    isCorrect
-  });
+              <div class="stmt">
+                <div class="stmtHeader">Cash Flow Statement</div>
+                <div class="stmtBody">
+                  <button class="dropZone" data-bucket="CF:Operating" type="button">
+                    <div class="dzTitle">Operating</div>
+                    <div class="dzHint">Cash from customers, wages, rent</div>
+                    <div class="dzItems" id="dz-CF-Operating"></div>
+                  </button>
 
-  updateScore();
+                  <button class="dropZone" data-bucket="CF:Investing" type="button">
+                    <div class="dzTitle">Investing</div>
+                    <div class="dzHint">Buy/sell equipment</div>
+                    <div class="dzItems" id="dz-CF-Investing"></div>
+                  </button>
 
-  if (!isCorrect) {
-    openModal("Not quite.", tx.explanation);
-    return;
-  }
+                  <button class="dropZone" data-bucket="CF:Financing" type="button">
+                    <div class="dzTitle">Financing</div>
+                    <div class="dzHint">Owner contributions, dividends</div>
+                    <div class="dzItems" id="dz-CF-Financing"></div>
+                  </button>
+                </div>
+              </div>
+            </div>
 
-  state.txIndex += 1;
-  if (state.txIndex >= transactions.length) {
-    startRound2();
-  } else {
-    renderRound1();
-  }
-}
+            <div class="muted small" style="margin-top:10px;">
+              This layout mirrors how finance teams actually classify items.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
 
-// ---------- Round 2 ----------
-function startRound2() {
-  roundLabel.textContent = "Round 2";
-  hide(round1Area);
-  show(round2Area);
-  renderLineItems();
-  updateSelectedBanner();
-  progressText.textContent = `Place ${state.remainingLineItems.length} items`;
-}
+    <!-- RESULTS SCREEN -->
+    <section id="resultsScreen" class="card hidden">
+      <h2>Final Reveal: BlueWave Coffee Totals</h2>
 
-function renderLineItems() {
-  itemsList.innerHTML = "";
-  state.remainingLineItems.forEach(item => {
-    const div = document.createElement("div");
-    div.className = "item";
-    div.textContent = item.label;
-    div.dataset.itemId = item.id;
+      <div class="resultsGrid">
+        <div class="panel">
+          <h3>Score</h3>
+          <p class="big">Final Score: <strong><span id="finalScoreText">0</span></strong></p>
+          <button id="restartBtn" class="btn" type="button">Play Again</button>
+        </div>
 
-    if (state.selectedLineItemId === item.id) div.classList.add("selected");
+        <div class="panel">
+          <h3>Totals</h3>
+          <div class="totals">
+            <div class="totRow"><span>Revenue</span><strong id="totRevenue">$0</strong></div>
+            <div class="totRow"><span>Expenses</span><strong id="totExpenses">$0</strong></div>
+            <div class="totRow net"><span>Net Income</span><strong id="totNetIncome">$0</strong></div>
+            <hr />
+            <div class="totRow"><span>Operating CF</span><strong id="totOpCF">$0</strong></div>
+            <div class="totRow"><span>Investing CF</span><strong id="totInvCF">$0</strong></div>
+            <div class="totRow"><span>Financing CF</span><strong id="totFinCF">$0</strong></div>
+          </div>
+        </div>
+      </div>
 
-    div.addEventListener("click", () => {
-      state.selectedLineItemId = item.id;
-      renderLineItems();
-      updateSelectedBanner();
-    });
+      <div class="panel">
+        <h3>Review</h3>
+        <div id="reviewArea" class="list"></div>
+      </div>
+    </section>
+  </main>
 
-    itemsList.appendChild(div);
-  });
+  <!-- FEEDBACK MODAL -->
+  <div id="modalOverlay" class="modalOverlay hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal card">
+      <h3 id="modalTitle">Feedback</h3>
+      <p id="modalBody">Explanation here.</p>
+      <button id="closeModalBtn" class="btn" type="button">Continue</button>
+    </div>
+  </div>
 
-  progressText.textContent = `Place ${state.remainingLineItems.length} items`;
-}
-
-function updateSelectedBanner() {
-  if (!state.selectedLineItemId) {
-    hide(selectedItemBanner);
-    selectedItemBanner.textContent = "";
-    return;
-  }
-  const item = state.remainingLineItems.find(x => x.id === state.selectedLineItemId);
-  if (!item) return;
-  selectedItemBanner.textContent = `Selected: ${item.label} — now click the correct bucket.`;
-  show(selectedItemBanner);
-}
-
-function handleBucketClick(bucket) {
-  if (!state.selectedLineItemId) {
-    openModal("Select an item first.", "Click a line item on the left, then click a bucket on the right.");
-    return;
-  }
-
-  const item = state.remainingLineItems.find(x => x.id === state.selectedLineItemId);
-  if (!item) return;
-
-  const isCorrect = bucket === item.bucket;
-  if (isCorrect) state.score += 1;
-  updateScore();
-
-  state.review.push({
-    type: "Round 2",
-    prompt: `Place: ${item.label}`,
-    yourAnswer: bucket,
-    correctAnswer: item.bucket,
-    explanation: item.explanation,
-    isCorrect
-  });
-
-  if (!isCorrect) {
-    openModal("Not quite.", item.explanation);
-    return;
-  }
-
-  state.remainingLineItems = state.remainingLineItems.filter(x => x.id !== item.id);
-  state.selectedLineItemId = null;
-
-  if (state.remainingLineItems.length === 0) {
-    showResults();
-  } else {
-    renderLineItems();
-    updateSelectedBanner();
-  }
-}
-
-// ---------- Results ----------
-function showResults() {
-  showScreen("results");
-  finalScoreText.textContent = state.score;
-
-  reviewArea.innerHTML = "";
-  state.review.forEach(r => {
-    const div = document.createElement("div");
-    div.className = "item";
-    div.innerHTML = `
-      <strong>${r.type}</strong><br/>
-      ${r.prompt}<br/>
-      <span class="muted">Your answer:</span> ${r.yourAnswer} |
-      <span class="muted">Correct:</span> ${r.correctAnswer}<br/>
-      <span class="muted">Why:</span> ${r.explanation}
-    `;
-    reviewArea.appendChild(div);
-  });
-}
-
-// ---------- Events ----------
-startBtn.addEventListener("click", () => {
-  resetGame();
-  showScreen("game");
-  renderRound1();
-});
-
-restartBtn.addEventListener("click", () => {
-  resetGame();
-  showScreen("start");
-});
-
-closeModalBtn.addEventListener("click", () => {
-  closeModal();
-});
-
-// Round 1 answer buttons
-document.querySelectorAll("[data-answer]").forEach(btn => {
-  btn.addEventListener("click", () => {
-    handleRound1Answer(btn.dataset.answer);
-  });
-});
-
-// Round 2 bucket buttons
-document.querySelectorAll(".bucket").forEach(btn => {
-  btn.addEventListener("click", () => {
-    handleBucketClick(btn.dataset.bucket);
-  });
-});
-
-// Initialize
-showScreen("start");
-hide(modalOverlay);
+  <script src="./script.js?v=20"></script>
+</body>
+</html>
