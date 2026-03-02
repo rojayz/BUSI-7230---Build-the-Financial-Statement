@@ -1,122 +1,258 @@
-* { box-sizing: border-box; }
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Build the Financial Statements</title>
+  <link rel="stylesheet" href="./style.css?v=10" />
+</head>
+<body>
+  <main class="container">
+    <header class="header">
+      <div class="brand">
+        <div class="logo">BW</div>
+        <div>
+          <h1>Build the Financial Statements</h1>
+          <p class="sub">BlueWave Coffee — classify transactions and build statements like a real finance team.</p>
+        </div>
+      </div>
+    </header>
 
-body {
-  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-  margin: 0;
-  background: #f6f7fb;
-  color: #111;
-}
+    <!-- START SCREEN -->
+    <section id="startScreen" class="card">
+      <h2>Scenario: You’re the “acting CFO” for BlueWave Coffee</h2>
+      <p class="muted">
+        BlueWave Coffee is growing fast. Leadership needs clean financials for decision-making.
+        Your job: (1) classify transactions by the primary statement impact, and (2) build the statements by placing line items into the correct sections.
+      </p>
 
-.container { max-width: 980px; margin: 0 auto; padding: 20px; }
-.header { margin-bottom: 16px; }
-.sub { margin-top: 6px; color: #555; }
+      <div class="grid2">
+        <div class="panel">
+          <h3>Learning Objectives</h3>
+          <ul>
+            <li>Identify the primary statement impacted by common business transactions.</li>
+            <li>Map line items to the Income Statement, Balance Sheet, and Cash Flow Statement sections.</li>
+            <li>Learn through immediate feedback and corrections.</li>
+          </ul>
+        </div>
 
-.card {
-  background: #fff;
-  border-radius: 14px;
-  padding: 18px;
-  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
-  margin-bottom: 16px;
-}
+        <div class="panel">
+          <h3>Rules (important)</h3>
+          <ul>
+            <li>Some transactions affect multiple statements. For this game, choose the <strong>primary</strong> statement for learning purposes.</li>
+            <li>Round 2 focuses on <strong>where items live</strong> on the statements (Revenue/Expense, Asset/Liability/Equity, etc.).</li>
+            <li>Totals shown at the end are instructional and based on your placed items.</li>
+          </ul>
+        </div>
+      </div>
 
-.hidden { display: none !important; }
+      <div class="startRow">
+        <button id="startBtn" class="btn">Start Game</button>
+        <span class="muted small">Tip: works best on desktop, but mobile-friendly.</span>
+      </div>
+    </section>
 
-.row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
+    <!-- GAME SCREEN -->
+    <section id="gameScreen" class="card hidden">
+      <div class="topRow">
+        <div>
+          <div id="roundLabel" class="pill">Round 1</div>
+          <div id="progressText" class="muted">Step 1 of 2</div>
+        </div>
 
-.pill {
-  display: inline-block;
-  padding: 6px 10px;
-  border-radius: 999px;
-  background: #eef2ff;
-  font-weight: 600;
-}
+        <div class="topRight">
+          <div class="scoreBox">
+            <div class="scoreLabel">Score</div>
+            <div class="scoreValue"><span id="scoreText">0</span></div>
+          </div>
+        </div>
+      </div>
 
-.muted { color: #666; }
+      <!-- Progress bar -->
+      <div class="progressWrap" aria-label="Progress">
+        <div id="progressBar" class="progressBar"></div>
+      </div>
 
-.score { font-weight: 700; }
+      <!-- ROUND 1 -->
+      <div id="round1Area" class="round">
+        <h2 class="roundTitle">Round 1: Classify the Transaction</h2>
+        <p class="muted">Click the statement panel that best matches the <strong>primary</strong> impact.</p>
 
-.buttonRow {
-  display: grid;
-  gap: 10px;
-  margin-top: 14px;
-}
+        <div class="txCard">
+          <div class="txMeta">
+            <span class="badge" id="txCountBadge">Transaction 1 of 10</span>
+            <span class="amount" id="txAmount">$0</span>
+          </div>
+          <div id="questionText" class="txText">Transaction will appear here.</div>
+        </div>
 
-.btn, .btn-secondary, .bucket {
-  border: 0;
-  border-radius: 10px;
-  padding: 12px 14px;
-  cursor: pointer;
-  font-weight: 700;
-}
+        <div class="statementsGrid">
+          <button class="statementCard" data-round1="IS" type="button">
+            <div class="statementTitle">Income Statement</div>
+            <div class="statementHint">Revenue & Expenses → Net Income</div>
+          </button>
 
-.btn { background: #111; color: #fff; }
-.btn:hover { opacity: 0.92; }
+          <button class="statementCard" data-round1="BS" type="button">
+            <div class="statementTitle">Balance Sheet</div>
+            <div class="statementHint">Assets, Liabilities, Equity</div>
+          </button>
 
-.btn-secondary { background: #f0f0f0; color: #111; }
-.btn-secondary:hover { background: #e7e7e7; }
+          <button class="statementCard" data-round1="CF" type="button">
+            <div class="statementTitle">Cash Flow Statement</div>
+            <div class="statementHint">Operating / Investing / Financing</div>
+          </button>
+        </div>
+      </div>
 
-.note {
-  background: #fff8db;
-  border: 1px solid #ffe08a;
-  border-radius: 10px;
-  padding: 12px;
-  margin: 12px 0;
-}
+      <!-- ROUND 2 -->
+      <div id="round2Area" class="round hidden">
+        <h2 class="roundTitle">Round 2: Build the Statements</h2>
+        <p class="muted">Click a line item, then click the exact section where it belongs.</p>
 
-.twoCol {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 14px;
-  margin-top: 10px;
-}
+        <div class="twoCol">
+          <div>
+            <h3>Line Items</h3>
+            <div id="itemsList" class="list"></div>
+            <div id="selectedItemBanner" class="note hidden"></div>
+          </div>
 
-@media (min-width: 860px) {
-  .twoCol { grid-template-columns: 1fr 1fr; }
-}
+          <div>
+            <h3>Financial Statements</h3>
 
-.list {
-  display: grid;
-  gap: 10px;
-  margin-top: 10px;
-}
+            <div class="statementLayout">
+              <!-- Income Statement -->
+              <div class="stmt">
+                <div class="stmtHeader">Income Statement</div>
+                <div class="stmtBody">
+                  <div class="stmtSection">
+                    <button class="dropZone" data-bucket="IS:Revenue" type="button">
+                      <div class="dzTitle">Revenue</div>
+                      <div class="dzHint">Sales, service revenue</div>
+                      <div class="dzItems" id="dz-IS-Revenue"></div>
+                    </button>
+                  </div>
 
-.item {
-  padding: 10px;
-  border: 1px solid #e6e6e6;
-  border-radius: 10px;
-  background: #fafafa;
-  cursor: pointer;
-}
+                  <div class="stmtSection">
+                    <button class="dropZone" data-bucket="IS:Expense" type="button">
+                      <div class="dzTitle">Expenses</div>
+                      <div class="dzHint">Wages, rent, depreciation</div>
+                      <div class="dzItems" id="dz-IS-Expense"></div>
+                    </button>
+                  </div>
+                </div>
+              </div>
 
-.item.selected {
-  outline: 3px solid #111;
-  background: #fff;
-}
+              <!-- Balance Sheet -->
+              <div class="stmt">
+                <div class="stmtHeader">Balance Sheet</div>
+                <div class="stmtBody">
+                  <div class="stmtSection">
+                    <button class="dropZone" data-bucket="BS:Asset" type="button">
+                      <div class="dzTitle">Assets</div>
+                      <div class="dzHint">Cash, A/R, inventory, equipment</div>
+                      <div class="dzItems" id="dz-BS-Asset"></div>
+                    </button>
+                  </div>
 
-.buckets { display: grid; gap: 10px; }
+                  <div class="stmtSection">
+                    <button class="dropZone" data-bucket="BS:Liability" type="button">
+                      <div class="dzTitle">Liabilities</div>
+                      <div class="dzHint">A/P, unearned revenue</div>
+                      <div class="dzItems" id="dz-BS-Liability"></div>
+                    </button>
+                  </div>
 
-.bucket {
-  background: #f7f7f7;
-  text-align: left;
-}
-.bucket:hover { background: #ededed; }
+                  <div class="stmtSection">
+                    <button class="dropZone" data-bucket="BS:Equity" type="button">
+                      <div class="dzTitle">Equity</div>
+                      <div class="dzHint">Owner contributions, retained earnings</div>
+                      <div class="dzItems" id="dz-BS-Equity"></div>
+                    </button>
+                  </div>
+                </div>
+              </div>
 
-.big { font-size: 1.1rem; }
+              <!-- Cash Flow -->
+              <div class="stmt">
+                <div class="stmtHeader">Cash Flow Statement</div>
+                <div class="stmtBody">
+                  <div class="stmtSection">
+                    <button class="dropZone" data-bucket="CF:Operating" type="button">
+                      <div class="dzTitle">Operating</div>
+                      <div class="dzHint">Cash from customers, wages, rent</div>
+                      <div class="dzItems" id="dz-CF-Operating"></div>
+                    </button>
+                  </div>
 
-.modalOverlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  display: grid;
-  place-items: center;
-  padding: 18px;
-  z-index: 9999;
-}
+                  <div class="stmtSection">
+                    <button class="dropZone" data-bucket="CF:Investing" type="button">
+                      <div class="dzTitle">Investing</div>
+                      <div class="dzHint">Buy/sell equipment</div>
+                      <div class="dzItems" id="dz-CF-Investing"></div>
+                    </button>
+                  </div>
 
-.modal { max-width: 600px; width: 100%; }
+                  <div class="stmtSection">
+                    <button class="dropZone" data-bucket="CF:Financing" type="button">
+                      <div class="dzTitle">Financing</div>
+                      <div class="dzHint">Owner contributions, dividends</div>
+                      <div class="dzItems" id="dz-CF-Financing"></div>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="miniHelp muted small">
+              Pro move: this is how finance teams think — items live in sections, not “random buckets.”
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RESULTS SCREEN -->
+    <section id="resultsScreen" class="card hidden">
+      <h2>Final Reveal: BlueWave Coffee Statements</h2>
+      <p class="muted">Below is what you built, including simple totals based on placed items.</p>
+
+      <div class="resultsGrid">
+        <div class="panel">
+          <h3>Score</h3>
+          <p class="big">Final Score: <strong><span id="finalScoreText">0</span></strong></p>
+          <button id="restartBtn" class="btn">Play Again</button>
+        </div>
+
+        <div class="panel">
+          <h3>Totals (Instructional)</h3>
+          <div class="totals">
+            <div class="totRow"><span>Revenue</span><strong id="totRevenue">$0</strong></div>
+            <div class="totRow"><span>Expenses</span><strong id="totExpenses">$0</strong></div>
+            <div class="totRow net"><span>Net Income</span><strong id="totNetIncome">$0</strong></div>
+            <hr />
+            <div class="totRow"><span>Operating CF</span><strong id="totOpCF">$0</strong></div>
+            <div class="totRow"><span>Investing CF</span><strong id="totInvCF">$0</strong></div>
+            <div class="totRow"><span>Financing CF</span><strong id="totFinCF">$0</strong></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h3>Review (What you answered)</h3>
+        <div id="reviewArea" class="list"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- FEEDBACK MODAL -->
+  <div id="modalOverlay" class="modalOverlay hidden" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal card">
+      <h3 id="modalTitle">Feedback</h3>
+      <p id="modalBody">Explanation here.</p>
+      <button id="closeModalBtn" class="btn" type="button">Continue</button>
+    </div>
+  </div>
+
+  <script src="./script.js?v=10"></script>
+</body>
+</html>
